@@ -45,7 +45,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Main main = new Main(5);
+		Main main = new Main(10);
 
 	
 
