@@ -3,11 +3,15 @@ Solution for code test from Hazelcast.
 
 ## Build App
 Use maven to build the application
-`mvn package`
+```
+mvn package
+```
 
 ## Run App
 Execute the JAR file created from the maven build.
-`java -jar target\node-1.0.jar [cluster_size]`
+```
+java -jar target\node-1.0.jar [cluster_size]
+```
 
 When the application is started you will see the following output message:
 ```
