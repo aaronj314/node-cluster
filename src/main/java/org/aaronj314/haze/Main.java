@@ -26,7 +26,7 @@ public class Main {
 	MembershipKey key;
 	NetworkInterface networkInter;
 
-	public Main(int size) throws Exception {
+	public Main(String[] args) throws Exception {
 		port = 5000;
 		isStarted = false;
 		isSyncNode = false;
@@ -34,7 +34,7 @@ public class Main {
 		uuid = UUID.randomUUID().toString();
 		nodes = new ConcurrentHashMap<String, String>();
 		nodes.put(uuid, uuid);
-		clusterSize = size;
+		clusterSize = parseCmdArg(args);
 
 		networkInter = getNetworkInterface();
 		channel = openChannel();
@@ -45,7 +45,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Main main = new Main(10);
+		
+		Main main = new Main(args);
 		System.out.println("Node UUID:"+main.uuid);
 	
 
@@ -71,6 +72,22 @@ public class Main {
 			}
 		}
 
+	}
+	
+	private int parseCmdArg(String[] args) {
+		int firstArg = 10;
+		if (args.length > 0) {
+		    try {
+		        firstArg = Integer.parseInt(args[0]);
+		    } catch (NumberFormatException e) {
+		        System.err.println("Argument" + args[0] + " must be an integer.");
+		        System.exit(1);
+		    }
+		} else {
+			System.out.println("no cluster size found on command line using default of 10");
+		}
+		
+		return firstArg;
 	}
 
 	private DatagramChannel openChannel() throws IOException {
