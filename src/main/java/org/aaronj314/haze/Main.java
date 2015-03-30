@@ -41,12 +41,12 @@ public class Main {
 
 		InetAddress groupAddr = InetAddress.getByName(group);
 		key = channel.join(groupAddr, networkInter);
-
+		
 	}
 
 	public static void main(String[] args) throws Exception {
 		Main main = new Main(10);
-
+		System.out.println("Node UUID:"+main.uuid);
 	
 
 		Thread tClient = new Thread(new MulticastClient(main));
