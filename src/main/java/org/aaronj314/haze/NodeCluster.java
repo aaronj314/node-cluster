@@ -69,7 +69,7 @@ public class NodeCluster {
 		mcServer.setName("multicast server");
 		mcServer.start();
 		
-		Thread.sleep(1000);
+		Thread.sleep(5000);
 		
 		
 		mcClient = new Thread(new MulticastClient(this, dChannel));

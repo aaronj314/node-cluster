@@ -36,12 +36,8 @@ public class ClusterManager {
 			
 			public void run() {
 				while(true) {
-					//if(!nodeCluster.isStarted) {
-						updateNodeList();
-						checkStartLimit();
-					//} else {
-						//updateStartNodeList();
-					//}
+					updateNodeList();
+					checkStartLimit();
 				try {
 					Thread.sleep(1000L);
 				} catch (InterruptedException e) {
