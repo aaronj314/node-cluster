@@ -7,15 +7,31 @@ Use maven to build the application
 mvn package
 ```
 
-## Run App
+## Usage
+```
+usage: Main
+ -c,--cluster-addr <arg>      Cluster addres used for cluster commuication
+                              - default 192.168.81.1
+ -cp,--cluster-port <arg>     Cluster port used for cluster communication
+                              - default 5050
+ -h,--help <arg>              Help
+ -m,--multicast-addr <arg>    Multicast address used for auto discovery -
+                              default 225.254.254.5
+ -mp,--multicast-port <arg>   Multicast port used for auto discovery -
+                              default 5000
+ -n,--numNodes <arg>          Number of nodes in the cluster
+```
+
+## Example to run the application
 Execute the JAR file created from the maven build.
 ```
-java -jar target\node-1.0.jar [cluster_size]
+java -jar target/node-1.0.jar -n 6 -cp 5052
 ```
 
 When the application is started you will see the following output message:
 ```
-java -jar target/node-1.0.jar 10
-Network Interface Name: en4
-Node UUID:b43d3ff9-a776-4b1f-b39f-775d70ae1cf2
+java -jar target/node-1.0.jar -n 6 -cp 5050
+Node Server listening on 192.168.81.1:5050
+Waiting for connections ...
+[NODE READY]Local Node UUID:18a0a894-fa43-422c-8ab1-1b818bc2b9ef
 ```
