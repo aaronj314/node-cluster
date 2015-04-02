@@ -32,6 +32,9 @@ public class MulticastClient implements Runnable {
 					if (data[0].equals(MulticastServer.ADD_NODE) && !data[1].equals(nodeCluster.localNode.uuid) && ts > nodeCluster.lastupdated) {
 						//System.out.println("data="+data[2]+":"+data[3]+":"+data[1]+":"+data[0]+"||");
 						//String[] addr = data[2].split(":");
+						if(!nodeCluster.isSynced) {
+							nodeCluster.isSynced = true;
+						}
 					
 								
 						InetSocketAddress addr = new InetSocketAddress(data[2], Integer.valueOf(Integer.valueOf(data[3])));
