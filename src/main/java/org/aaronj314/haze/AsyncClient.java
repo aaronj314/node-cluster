@@ -1,80 +1,108 @@
 package org.aaronj314.haze;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
-import java.util.concurrent.ExecutionException;
 
-public class AsyncClient {
+public class AsyncClient implements Runnable,CompletionHandler<Integer, ByteBuffer> {
+	volatile boolean completed = false;
+	volatile boolean error = false;
+	NodeCluster nodeCluster;
+	public AsyncClient(NodeCluster nodeCluster) {
+		this.nodeCluster = nodeCluster;
+	}
 
-	static boolean completed = false;
-    public static void main(String[] args)
-    {
-         
-        final int SERVER_PORT = 9001;
-        final String SERVER_IP = "127.0.0.1";
-        
-        ByteBuffer receivingBuffer = ByteBuffer.allocateDirect(1024);
-        ByteBuffer sendingBuffer = ByteBuffer.wrap("Hello".getBytes());
-                
-        //create asynchronous socket channel
-        try (final AsynchronousSocketChannel asynchronousSocketChannel = AsynchronousSocketChannel.open())
-        {
-            if (asynchronousSocketChannel.isOpen())
-            {
-                //connect this channel's socket
-                Void connect = asynchronousSocketChannel.connect(new InetSocketAddress(SERVER_IP, SERVER_PORT)).get();
-                if (connect == null)
-                {
-                    System.out.println("Local address: " + asynchronousSocketChannel.getLocalAddress());
-                     
-                    //sending data
-                    asynchronousSocketChannel.write(sendingBuffer).get();
-                    asynchronousSocketChannel.read(receivingBuffer, receivingBuffer,  new CompletionHandler<Integer, ByteBuffer>()
-                    {
-                        public void completed(Integer result, ByteBuffer buffer)
-                        {
-                            buffer.flip();
-                            String msgReceived = Charset.defaultCharset().decode(buffer).toString();
-                            System.out.println("Msg received from server : " + msgReceived);
-                            completed = true;
-                        }
-                        public void failed(Throwable exc, ByteBuffer buffer)
-                        {
-                            completed = false;
-                            throw new UnsupportedOperationException("read failed!");
-                        }                                             
-                  });
-                   
-                  while(!completed)
-                  {
-                      try
-                      {
-                          Thread.sleep(1000);
-                      }
-                      catch(Exception e){}
-                      System.out.println("Waiting for response from the server");
-                  } 
-                   
-                }
-                else
-                {
-                    System.out.println("The connection cannot be established!");
-                }
-            }
-            else
-            {
-                System.out.println("The asynchronous socket channel cannot be opened!");
-            }
-        }
-        catch (IOException | InterruptedException | ExecutionException ex)
-        {
-            System.err.println(ex);
-        }
-       
-    }
+	public boolean pingNode(InetSocketAddress nodeAddr, String msg) {
+		completed = false;
+		error = false;
+		ByteBuffer receivingBuffer = ByteBuffer.allocateDirect(1024);
+		ByteBuffer sendingBuffer = ByteBuffer.wrap(msg.getBytes());
+
+		try {
+			//System.out.println("sending messing to node:"+msg);
+			writeToChannel(nodeAddr, receivingBuffer, sendingBuffer);
+		} catch (Exception ex) {
+			//System.out.println("Error reading node:"+msg);
+			error = true;
+		}
+		return error;
+	}
+	
+	private void writeToChannel(InetSocketAddress nodeAddr, ByteBuffer receivingBuffer, ByteBuffer sendingBuffer) throws Exception {
+		final AsynchronousSocketChannel asynchronousSocketChannel = AsynchronousSocketChannel.open();
+		if (asynchronousSocketChannel.isOpen()) {
+			//String ip = main.networkInter.getInetAddresses().nextElement().getHostAddress();
+			Void connect = asynchronousSocketChannel.connect(nodeAddr).get();
+			if (connect == null) {
+				//System.out.println("Local address: "+ asynchronousSocketChannel.getLocalAddress());
+				asynchronousSocketChannel.write(sendingBuffer).get();
+				asynchronousSocketChannel.read(receivingBuffer, receivingBuffer, this);
+				
+				while (!completed) {
+					try {
+						Thread.sleep(500);
+					} catch (Exception e) {
+					}
+					//System.out.println("Waiting for response from the server");
+				}
+
+			} else {
+				System.out.println("The connection cannot be established!");
+			}
+		} else {
+			System.out.println("The asynchronous socket channel cannot be opened!");
+		}
+	}
+	
+	
+
+	@Override
+	public void run() {
+
+	}
+
+	@Override
+	public void completed(Integer result, ByteBuffer buffer) {
+		buffer.flip();
+		String msgReceived = Charset.defaultCharset().decode(buffer).toString();
+		String[] data = msgReceived.split("\\|");
+		 
+		 if(data[0].equals("ADD_NODE_ACK")) {
+        	 handleAddNodeSyn(data);
+         } 
+		
+		completed = true;
+		
+	}
+	
+	
+
+	@Override
+	public void failed(Throwable exc, ByteBuffer buffer) {
+		
+		System.out.println("Error:"+exc.getMessage());
+		completed = true;
+		error = true;
+	}
+	
+	private void handleAddNodeSyn(String[] data) {
+		Node u = nodeCluster.nodes.get(data[1]);
+		if (u == null) {
+			
+			
+				Node n = new Node(data[1]);
+				n.hostIp = data[2];
+				n.port = Integer.valueOf(data[3]);
+				nodeCluster.nodes.put(data[1], n);
+			
+				System.out.println("THIS NODE:"+nodeCluster.localNode);
+				System.out.println("THIS NODE TS:"+nodeCluster.lastupdated);
+				System.out.println("ADDED THIS NODE TO LIST:"+n);
+				System.out.println("NODE LIST="+nodeCluster.nodes);
+	
+		}
+	}
 
 }

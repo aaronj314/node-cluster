@@ -1,116 +1,95 @@
 package org.aaronj314.haze;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.StandardProtocolFamily;
-import java.net.StandardSocketOptions;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.MembershipKey;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Iterator;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 public class Main {
-	int port;
-	String group;
-	Map<String, String> nodes;
-	String uuid;
+	private Options options;
 	int clusterSize;
 	volatile boolean isStarted;
 	volatile boolean isSyncNode;
-	DatagramChannel channel;
-	MembershipKey key;
-	NetworkInterface networkInter;
 
-	public Main(String[] args) throws Exception {
-		port = 5000;
-		isStarted = false;
-		isSyncNode = false;
-		group = "225.254.254.5";
-		uuid = UUID.randomUUID().toString();
-		nodes = new ConcurrentHashMap<String, String>();
-		nodes.put(uuid, uuid);
-		clusterSize = parseCmdArg(args);
+	public Main() {
+		options = new Options();
+		addCliOptions();
 
-		networkInter = getNetworkInterface();
-		channel = openChannel();
-
-		InetAddress groupAddr = InetAddress.getByName(group);
-		key = channel.join(groupAddr, networkInter);
-		
 	}
+	
+	public void init(String[] args) throws Exception {
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cm = parser.parse(options, args);
+		
+		if(!cm.hasOption("n")) {
+			help();
+			return;
+		}
+		
+		Iterator<Option> ops = cm.iterator();
+		
+		int n = 0;
+		String m = "225.254.254.5";
+		int mp = 5000;
+		String c = "192.168.81.1";
+		int cp = 5050;
+		while(ops.hasNext()) {
+			Option o = ops.next();
+			if(o.getOpt().equals("n")) {
+				n = Integer.valueOf(o.getValue());
+				n--;
+			}
+			
+			if(o.getOpt().equals("m")) {
+				m = o.getValue();
+			} 
+			if(o.getOpt().equals("mp")) {
+				mp = Integer.valueOf(o.getValue());
+			}
+			
+			if(o.getOpt().equals("c")) {
+				c = o.getValue();
+			} 
+
+			if(o.getOpt().equals("cp")) {
+				cp = Integer.valueOf(o.getValue());
+			} 
+			
+		}
+		
+		ClusterManager cMgr = new ClusterManager();
+		cMgr.startLimit = n;
+		NodeCluster nodeCluster = cMgr.startNodeCluster(m, mp, c, cp);
+		System.out.println("Local Node UUID:" + nodeCluster.localNode.uuid);
+	}
+
 
 	public static void main(String[] args) throws Exception {
+
+		Main main = new Main();
+		main.init(args);
 		
-		Main main = new Main(args);
-		System.out.println("Node UUID:"+main.uuid);
-	
-
-		Thread tClient = new Thread(new MulticastClient(main));
-		Thread tServer = new Thread(new MulticastServer(main));
-
-		tClient.setName("multicast client");
-		tServer.setName("multicast server");
-
-		tClient.start();
-		tServer.start();
-	
-		
-		while (true) {
-			if (main.isStarted) {
-				System.out.println(main.uuid + "::node ready");
-				return;
-			}
-
-			try {
-				Thread.sleep(5000L);
-			} catch (InterruptedException e) {
-			}
-		}
-
 	}
 	
-	private int parseCmdArg(String[] args) {
-		int firstArg = 10;
-		if (args.length > 0) {
-		    try {
-		        firstArg = Integer.parseInt(args[0]);
-		    } catch (NumberFormatException e) {
-		        System.err.println("Argument" + args[0] + " must be an integer.");
-		        System.exit(1);
-		    }
-		} else {
-			System.out.println("no cluster size found on command line using default of 10");
-		}
-		
-		return firstArg;
+	private void addCliOptions() {
+		options.addOption("h", "help", true, "Help");
+		options.addOption("n", "numNodes", true, "Number of nodes in the cluster");
+		options.addOption("m", "multicast-addr", true, "Multicast address used for auto discovery - default 225.254.254.5");
+		options.addOption("mp", "multicast-port", true, "Multicast port used for auto discovery - default 5000");
+		options.addOption("c", "cluster-addr", true, "Cluster addres used for cluster commuication - default 192.168.81.1");
+		options.addOption("cp", "cluster-port", true, "Cluster port used for cluster communication - default 5050");
 	}
 
-	private DatagramChannel openChannel() throws IOException {
-		DatagramChannel dc = DatagramChannel.open(StandardProtocolFamily.INET);
+	private void help() {
+		// This prints out some help
+		HelpFormatter formater = new HelpFormatter();
 
-		NetworkInterface interf = NetworkInterface.getByName("en4");
-		dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-		dc.bind(new InetSocketAddress(port));
-		dc.setOption(StandardSocketOptions.IP_MULTICAST_IF, interf);
-		return dc;
-	}
-
-	private static NetworkInterface getNetworkInterface() throws SocketException {
-		Enumeration<NetworkInterface> en = NetworkInterface
-				.getNetworkInterfaces();
-		NetworkInterface ni = null;
-
-		while (en.hasMoreElements()) {
-			ni = en.nextElement();
-			System.out.println("Network Interface Name: " + ni.getName());
-			break;
-		}
-		return ni;
+		formater.printHelp("Main", options);
+		System.exit(0);
 	}
 
 }

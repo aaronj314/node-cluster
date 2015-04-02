@@ -1,52 +1,47 @@
 package org.aaronj314.haze;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class MulticastClient implements Runnable {
-	Main main;
+	NodeCluster nodeCluster;
+	DatagramChannel channel;
 	MulticastSocket receiver;
+	AsyncClient asyncClient;
 	
-	MulticastClient(Main main) {
-		this.main = main;
+	MulticastClient(NodeCluster nodeCluster, DatagramChannel channel) {
+		this.nodeCluster = nodeCluster;
+		this.channel = channel;
+		asyncClient = new AsyncClient(nodeCluster);
 	}
 
 	public void run() {
-
 		try {
 			while (true) {
-				if (main.nodes.size() >= main.clusterSize) {
-					List<String> uuids = new ArrayList<String>(
-							main.nodes.values());
-					sortList(uuids);
-
-					if (uuids.get(0).equals(main.uuid)) {
-						main.isSyncNode = true;
-						main.isStarted = true;
-						System.out.println("We are started!");
-
-						return;
-					}
-				}
+				
 				try {
-					String data = readStringFromChannel(main.channel);
+					//ADD_NODE|UUID|HOST|PORT|TIMESTAMP
+					String[] data = readStringFromChannel(channel).split("\\|");
+					
+					long ts = Long.valueOf(data[4]);
+					if (data[0].equals(MulticastServer.ADD_NODE) && !data[1].equals(nodeCluster.localNode.uuid) && ts > nodeCluster.lastupdated) {
+						//System.out.println("data="+data[2]+":"+data[3]+":"+data[1]+":"+data[0]+"||");
+						//String[] addr = data[2].split(":");
+					
+								
+						InetSocketAddress addr = new InetSocketAddress(data[2], Integer.valueOf(Integer.valueOf(data[3])));
+							asyncClient.pingNode(addr,"ADD_NODE_SYN|"+nodeCluster.localNode.uuid
+									+"|"+nodeCluster.clusterIP+"|"+nodeCluster.cPort+"|"+nodeCluster.lastupdated);
+								
+		
+						
 
-					if (data.equals("ALL_STARTED")) {
-						main.isStarted = true;
-						return;
-					} else if (!data.equals(main.uuid)) {
-
-						String u = main.nodes.get(data);
-						if (u == null) {
-							main.nodes.put(data, data);
-						}
+						
 					}
 					
 				} catch (SocketTimeoutException ste) {
@@ -71,9 +66,5 @@ public class MulticastClient implements Runnable {
 		in.get(bytes, 0, limits);
 		String data = new String(bytes);
 		return data;
-	}
-
-	private static void sortList(List<String> aItems) {
-		Collections.sort(aItems, String.CASE_INSENSITIVE_ORDER);
 	}
 }

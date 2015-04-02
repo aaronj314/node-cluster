@@ -1,35 +1,45 @@
 package org.aaronj314.haze;
 
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 
 public class MulticastServer implements Runnable {
-	Main main;
-	
-	public MulticastServer(Main main) {
-		this.main = main;
+	static final String ADD_NODE = "ADD_NODE_SYNC";
+	NodeCluster nodeCluster;
+	DatagramChannel channel;
+	public MulticastServer(NodeCluster nodeCluster, DatagramChannel channel) {
+		this.nodeCluster = nodeCluster;
+		this.channel = channel;
 	}
 	
 	public void run() {
 		
 		try {
-			InetSocketAddress group = new InetSocketAddress(main.group, main.port);
-	
-			while(true) {
-				ByteBuffer buffer = ByteBuffer.wrap(main.uuid.getBytes());
+			InetSocketAddress group = new InetSocketAddress(nodeCluster.mcGroup, nodeCluster.mcPort);
+			NetworkInterface ni = channel.getOption(StandardSocketOptions.IP_MULTICAST_IF);
+			String msg = ADD_NODE+"|"+nodeCluster.localNode.uuid+"|"+ni.getInetAddresses().nextElement().getHostAddress()
+					+"|"+nodeCluster.localNode.port+"|"+nodeCluster.lastupdated;
+			//while(true) {
+				System.out.println("out messsage from MC server:"+msg);
+				ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
 
-				if(main.isSyncNode) {
-					ByteBuffer allStartedMsg = ByteBuffer.wrap("ALL_STARTED".getBytes());
-					main.channel.send(allStartedMsg, group);
-					
-					return;
-				} else if(main.isStarted) {
-					return;
-				}
-
-				main.channel.send(buffer, group);
-				Thread.sleep(200);
-			}
+//				if(main.isSyncNode) {
+//					ByteBuffer allStartedMsg = ByteBuffer.wrap("ALL_STARTED".getBytes());
+//					main.channel.send(allStartedMsg, group);
+//					
+//					return;
+//				} else if(main.isStarted) {
+//					return;
+//				}
+				//System.out.println("send="+msg);
+				channel.send(buffer, group);
+				Thread.sleep(2000);
+				//channel.send(buffer, group);
+				
+			//}
 			
 			
 		} catch (Exception e) {

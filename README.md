@@ -19,8 +19,3 @@ java -jar target/node-1.0.jar 10
 Network Interface Name: en4
 Node UUID:b43d3ff9-a776-4b1f-b39f-775d70ae1cf2
 ```
-
-When
-
-
-
