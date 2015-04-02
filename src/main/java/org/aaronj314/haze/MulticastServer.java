@@ -23,21 +23,10 @@ public class MulticastServer implements Runnable {
 			String msg = ADD_NODE+"|"+nodeCluster.localNode.uuid+"|"+ni.getInetAddresses().nextElement().getHostAddress()
 					+"|"+nodeCluster.localNode.port+"|"+nodeCluster.lastupdated;
 			//while(true) {
-				System.out.println("out messsage from MC server:"+msg);
+				//System.out.println("out messsage from MC server:"+msg);
 				ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-
-//				if(main.isSyncNode) {
-//					ByteBuffer allStartedMsg = ByteBuffer.wrap("ALL_STARTED".getBytes());
-//					main.channel.send(allStartedMsg, group);
-//					
-//					return;
-//				} else if(main.isStarted) {
-//					return;
-//				}
-				//System.out.println("send="+msg);
 				channel.send(buffer, group);
 				Thread.sleep(2000);
-				//channel.send(buffer, group);
 				
 			//}
 			

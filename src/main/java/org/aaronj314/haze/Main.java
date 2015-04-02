@@ -64,7 +64,12 @@ public class Main {
 		ClusterManager cMgr = new ClusterManager();
 		cMgr.startLimit = n;
 		NodeCluster nodeCluster = cMgr.startNodeCluster(m, mp, c, cp);
-		System.out.println("Local Node UUID:" + nodeCluster.localNode.uuid);
+		
+		while(!nodeCluster.isLocalStarted) {
+			Thread.sleep(1000);
+		}
+		
+		System.out.println("[NODE READY]Local Node UUID:" + nodeCluster.localNode.uuid);
 	}
 
 

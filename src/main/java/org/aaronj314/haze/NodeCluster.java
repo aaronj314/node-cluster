@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class NodeCluster {
 	volatile boolean isStarted;
+	volatile boolean isLocalStarted;
 	volatile long lastupdated;
 	volatile boolean isSynced;
 	String mcGroup;
@@ -42,8 +43,8 @@ public class NodeCluster {
 	}
 	
 	protected List<String> getNodeUUIDs() {
-		List l = new ArrayList<String>(nodes.keySet());
-		  l.add(localNode.uuid);
+		List<String> l = new ArrayList<String>(nodes.keySet());
+		l.add(localNode.uuid);
 		return l;
 	}
 	
@@ -68,11 +69,13 @@ public class NodeCluster {
 		mcServer.setName("multicast server");
 		mcServer.start();
 		
-		Thread.sleep(2000);
+		Thread.sleep(1000);
+		
 		
 		mcClient = new Thread(new MulticastClient(this, dChannel));
 		mcClient.setName("multicast client");
 		mcClient.start();
+		isLocalStarted = true;
 	}
 	
 	public void addNode(Node node) {

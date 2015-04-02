@@ -56,11 +56,11 @@ public class ClusterManager {
 		if (nodeCluster.size() >= startLimit) {
 			List<String> uuids =nodeCluster.getNodeUUIDs();
 			Collections.sort(uuids, String.CASE_INSENSITIVE_ORDER);
-			System.out.println("checking started:"+nodeCluster.size()+"::"+startLimit);
+			//System.out.println("checking started:"+nodeCluster.size()+"::"+startLimit);
 			if (uuids.get(0).equals(nodeCluster.localNode.uuid) && !nodeCluster.isStarted) {
 				nodeCluster.isStarted = true;
 				nodeCluster.lastupdated = System.nanoTime();
-				System.out.println("We are started:"+nodeCluster.size());
+				System.out.println("We are started!::clusterSize="+(nodeCluster.size() +1));
 			}
 		}
 	}
@@ -74,12 +74,13 @@ public class ClusterManager {
 				InetSocketAddress addr = new InetSocketAddress(n.hostIp, Integer.valueOf(n.port));
 				boolean error = new AsyncClient(nodeCluster).pingNode(addr, "SYN_START|"+n.uuid+"|"+nodeCluster.lastupdated);
 				if (error) {
-					System.out.println("Removed: " + pair.getKey());
 					it.remove();
+					System.out.println("Dead node detected removed: " + pair.getKey());
+
 					if(nodeCluster.isStarted) {
 						nodeCluster.isStarted = false;
 						nodeCluster.lastupdated = System.nanoTime();
-						System.out.println("dead node cluster not started:"+nodeCluster.size());
+						System.out.println("cluster state set to 'not started':"+(nodeCluster.size()+1));
 					}
 					return;
 				}
@@ -96,8 +97,8 @@ public class ClusterManager {
 				InetSocketAddress addr = new InetSocketAddress(n.hostIp, Integer.valueOf(n.port));
 				boolean error = new AsyncClient(nodeCluster).pingNode(addr, "SYN|"+n.uuid+"|"+nodeCluster.lastupdated);
 				if (error) {
-					System.out.println("Removed: " + pair.getKey());
 					it.remove();
+					System.out.println("Dead node detected removed: " + pair.getKey());
 					if(nodeCluster.isStarted) {
 						nodeCluster.isStarted = false;
 						nodeCluster.lastupdated = System.nanoTime();

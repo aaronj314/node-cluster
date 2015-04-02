@@ -82,7 +82,7 @@ public class AsyncClient implements Runnable,CompletionHandler<Integer, ByteBuff
 	@Override
 	public void failed(Throwable exc, ByteBuffer buffer) {
 		
-		System.out.println("Error:"+exc.getMessage());
+		//System.out.println("Error:"+exc.getMessage());
 		completed = true;
 		error = true;
 	}

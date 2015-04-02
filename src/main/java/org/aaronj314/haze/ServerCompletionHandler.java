@@ -1,6 +1,5 @@
 package org.aaronj314.haze;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -26,6 +25,7 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
         	 handleAddNodeSyn(data);
         	 writeToChannel("ADD_NODE_ACK|"+nodeCluster.localNode.uuid+"|"+nodeCluster.localNode.hostIp
         			 +"|"+nodeCluster.localNode.port+"|"+nodeCluster.lastupdated);
+        	 nodeCluster.isSynced = true;
          } else if(data[0].equals("SYN")) {
         	long ts = Long.valueOf(data[2]);
         	if(ts > nodeCluster.lastupdated) {

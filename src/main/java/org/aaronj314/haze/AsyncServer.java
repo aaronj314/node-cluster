@@ -58,6 +58,6 @@ public class AsyncServer implements Runnable {
 	
 	private void bind(AsynchronousServerSocketChannel channel) throws Exception {
 		channel.bind(new InetSocketAddress(nodeCluster.localNode.hostIp, nodeCluster.localNode.port));
-		System.out.println("Node Server listening on"+nodeCluster.clusterIP+"|"+nodeCluster.localNode.port);
+		System.out.println("Node Server listening on "+nodeCluster.clusterIP+":"+nodeCluster.localNode.port);
 	}
 }
