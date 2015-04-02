@@ -1,5 +1,13 @@
 # hazelcast
 Solution for code test from Hazelcast.
+Note the TTL for multicast network is set to '1'.
+
+## How it works
+1. Node start and send multicast hello sync message
+2. The receiving nodes adds the new node to it's view
+3. Hello ACK is received by the node and adds the responding node to it's view
+
+
 
 ## Build App
 Use maven to build the application
