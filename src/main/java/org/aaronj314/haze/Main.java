@@ -69,7 +69,7 @@ public class Main {
 			Thread.sleep(1000);
 		}
 		
-		System.out.println("[NODE READY]Local Node UUID:" + nodeCluster.localNode.uuid);
+		System.out.println("[NODE READY]Local Node UUID:" + nodeCluster.localNode.uuid+":TS="+nodeCluster.lastupdated);
 	}
 
 

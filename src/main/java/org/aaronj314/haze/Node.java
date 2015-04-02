@@ -6,18 +6,21 @@ public class Node {
 	String uuid;
 	String hostIp;
 	int port = 5050;
+	NodeCluster nodeCluster;
 	
 	
-	public Node() {
+	public Node(NodeCluster nodeCluster) {
 		uuid = UUID.randomUUID().toString();
+		this.nodeCluster = nodeCluster;
 	}
 	
-	public Node(String uuid) {
+	public Node(NodeCluster nodeCluster, String uuid) {
 		this.uuid = uuid;
+		this.nodeCluster = nodeCluster;
 	}
 	
 	@Override
 	public String toString() {
-		return "UUID="+uuid+":hostIp="+hostIp+":port="+port;
+		return "UUID="+uuid+":hostIp="+hostIp+":port="+port+":timestamp="+nodeCluster.lastupdated;
 	}
 }

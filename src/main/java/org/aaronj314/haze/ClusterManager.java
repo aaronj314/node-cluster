@@ -39,7 +39,7 @@ public class ClusterManager {
 					updateNodeList();
 					checkStartLimit();
 				try {
-					Thread.sleep(1000L);
+					Thread.sleep(2000L);
 				} catch (InterruptedException e) {
 				}
 				}
@@ -56,7 +56,11 @@ public class ClusterManager {
 			if (uuids.get(0).equals(nodeCluster.localNode.uuid) && !nodeCluster.isStarted) {
 				nodeCluster.isStarted = true;
 				nodeCluster.lastupdated = System.nanoTime();
-				System.out.println("********We are started!***********::clusterSize="+(nodeCluster.size() +1));
+				System.out.println("************************************\n"
+						          +"******** We are started! ***********\n"
+						          +"******** cluster size="+(nodeCluster.size() +1)+"  ***********\n"
+						          +"******** TS="+nodeCluster.lastupdated+" ********\n"
+						          +"************************************");
 				updateStartNodeListState();
 			}
 		}

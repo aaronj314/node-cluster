@@ -22,14 +22,13 @@ public class MulticastServer implements Runnable {
 			NetworkInterface ni = channel.getOption(StandardSocketOptions.IP_MULTICAST_IF);
 			String msg = ADD_NODE+"|"+nodeCluster.localNode.uuid+"|"+ni.getInetAddresses().nextElement().getHostAddress()
 					+"|"+nodeCluster.localNode.port+"|"+nodeCluster.lastupdated;
-			//while(true) {
+			while(!nodeCluster.isSynced) {
 				//System.out.println("out messsage from MC server:"+msg);
 				ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
 				channel.send(buffer, group);
-				Thread.sleep(2000);
-				
-			//}
-			
+				Thread.sleep(1000);
+			}
+			System.out.println("NODE SYNCED:"+nodeCluster.localNode);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

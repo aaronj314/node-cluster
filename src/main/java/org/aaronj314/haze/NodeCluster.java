@@ -49,7 +49,7 @@ public class NodeCluster {
 	}
 	
 	public void start() throws Exception {
-		localNode = new Node();
+		localNode = new Node(this);
 		localNode.hostIp = clusterIP;
 		localNode.port = cPort;
 		AsyncServer asyncServer = new AsyncServer(this);

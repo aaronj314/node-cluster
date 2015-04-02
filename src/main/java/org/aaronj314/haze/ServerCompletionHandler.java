@@ -30,13 +30,18 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
         	long ts = Long.valueOf(data[2]);
         	if(ts > nodeCluster.lastupdated) {
         		nodeCluster.lastupdated = ts;
+        		System.out.println("NODE TS STAGE CHANGED BY:"+data[1]+":TS="+ts);
+        		if(nodeCluster.isStarted) {
+        			
+        			nodeCluster.isStarted = false;
+        		}
         	}
             writeToChannel("ACK|"+nodeCluster.localNode.uuid);
          } else if (data[0].equals("SYN_START")) {
         	 long ts = Long.valueOf(data[2]);
          	if(ts > nodeCluster.lastupdated) {
          		nodeCluster.lastupdated = ts;
-         		System.out.println("'Node set to started state by node:"+data[1]);
+         		System.out.println("NODE 'started' STAGE CHANGED to TRUE BY:"+data[1]+":TS="+ts);
          		 nodeCluster.isStarted = true;
          	}
         	
@@ -56,7 +61,7 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
 		if (u == null) {
 			
 			
-				Node n = new Node(data[1]);
+				Node n = new Node(nodeCluster,data[1]);
 				n.hostIp = data[2];
 				n.port = Integer.valueOf(data[3]);
 				nodeCluster.lastupdated = Long.valueOf(data[4]);

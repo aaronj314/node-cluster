@@ -40,13 +40,13 @@ public class AsyncClient implements Runnable,CompletionHandler<Integer, ByteBuff
 				asynchronousSocketChannel.write(sendingBuffer).get();
 				asynchronousSocketChannel.read(receivingBuffer, receivingBuffer, this);
 				
-				while (!completed) {
-					try {
-						Thread.sleep(500);
-					} catch (Exception e) {
-					}
-					//System.out.println("Waiting for response from the server");
-				}
+//				while (!completed) {
+//					try {
+//						Thread.sleep(500);
+//					} catch (Exception e) {
+//					}
+//					//System.out.println("Waiting for response from the server");
+//				}
 
 			} else {
 				System.out.println("The connection cannot be established!");
@@ -92,7 +92,7 @@ public class AsyncClient implements Runnable,CompletionHandler<Integer, ByteBuff
 		if (u == null) {
 			
 			
-				Node n = new Node(data[1]);
+				Node n = new Node(nodeCluster,data[1]);
 				n.hostIp = data[2];
 				n.port = Integer.valueOf(data[3]);
 				nodeCluster.nodes.put(data[1], n);
