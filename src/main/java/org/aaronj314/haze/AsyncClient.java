@@ -97,10 +97,10 @@ public class AsyncClient implements Runnable,CompletionHandler<Integer, ByteBuff
 				n.port = Integer.valueOf(data[3]);
 				nodeCluster.nodes.put(data[1], n);
 			
-				System.out.println("THIS NODE:"+nodeCluster.localNode);
-				System.out.println("THIS NODE TS:"+nodeCluster.lastupdated);
-				System.out.println("ADDED THIS NODE TO LIST:"+n);
-				System.out.println("NODE LIST="+nodeCluster.nodes);
+				//System.out.println("THIS NODE:"+nodeCluster.localNode);
+				//System.out.println("THIS NODE TS:"+nodeCluster.lastupdated);
+				System.out.println("ADDED NODE::"+n+":TO NODE::"+nodeCluster.localNode);
+			//	System.out.println("NODE LIST="+nodeCluster.nodes);
 	
 		}
 	}

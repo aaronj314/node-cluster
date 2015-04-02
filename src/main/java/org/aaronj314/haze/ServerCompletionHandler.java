@@ -21,7 +21,7 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
          String[] data = msgReceived.split("\\|");
         
          if(data[0].equals("ADD_NODE_SYN")) {
-        	 System.out.println(msgReceived);
+        	 //System.out.println(msgReceived);
         	 handleAddNodeSyn(data);
         	 writeToChannel("ADD_NODE_ACK|"+nodeCluster.localNode.uuid+"|"+nodeCluster.localNode.hostIp
         			 +"|"+nodeCluster.localNode.port+"|"+nodeCluster.lastupdated);
@@ -36,6 +36,7 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
         	 long ts = Long.valueOf(data[2]);
          	if(ts > nodeCluster.lastupdated) {
          		nodeCluster.lastupdated = ts;
+         		System.out.println("'Node set to started state by node:"+data[1]);
          		 nodeCluster.isStarted = true;
          	}
         	
@@ -61,10 +62,10 @@ public class ServerCompletionHandler implements CompletionHandler<Integer, ByteB
 				nodeCluster.lastupdated = Long.valueOf(data[4]);
 				nodeCluster.nodes.put(data[1], n);
 			
-				System.out.println("THIS NODE:"+nodeCluster.localNode);
-				System.out.println("THIS NODE TS:"+nodeCluster.lastupdated);
-				System.out.println("ADDED THIS NODE TO LIST:"+n);
-				System.out.println("NODE LIST="+nodeCluster.nodes);
+				//System.out.println("THIS NODE:"+nodeCluster.localNode);
+				//System.out.println("THIS NODE TS:"+nodeCluster.lastupdated);
+				System.out.println("ADDED NODE::"+n+":TO NODE::"+nodeCluster.localNode);
+				//System.out.println("NODE LIST="+nodeCluster.nodes);
 	
 		}
 	}

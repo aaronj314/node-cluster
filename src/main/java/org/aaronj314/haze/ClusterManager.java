@@ -36,12 +36,12 @@ public class ClusterManager {
 			
 			public void run() {
 				while(true) {
-					if(!nodeCluster.isStarted) {
+					//if(!nodeCluster.isStarted) {
 						updateNodeList();
 						checkStartLimit();
-					} else {
-						updateStartNodeList();
-					}
+					//} else {
+						//updateStartNodeList();
+					//}
 				try {
 					Thread.sleep(1000L);
 				} catch (InterruptedException e) {
@@ -61,29 +61,23 @@ public class ClusterManager {
 				nodeCluster.isStarted = true;
 				nodeCluster.lastupdated = System.nanoTime();
 				System.out.println("********We are started!***********::clusterSize="+(nodeCluster.size() +1));
+				updateStartNodeListState();
 			}
 		}
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public void updateStartNodeList() {
+	public void updateStartNodeListState() {
 		Iterator it = nodeCluster.nodes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry) it.next();
-				Node n = ((Node) pair.getValue());
-				InetSocketAddress addr = new InetSocketAddress(n.hostIp, Integer.valueOf(n.port));
-				boolean error = new AsyncClient(nodeCluster).pingNode(addr, "SYN_START|"+n.uuid+"|"+nodeCluster.lastupdated);
-				if (error) {
-					it.remove();
-					System.out.println("Dead node detected removed: " + pair.getKey());
-
-					if(nodeCluster.isStarted) {
-						nodeCluster.isStarted = false;
-						nodeCluster.lastupdated = System.nanoTime();
-						System.out.println("cluster state set to 'not started':"+(nodeCluster.size()+1));
-					}
-					return;
-				}
+			Node n = ((Node) pair.getValue());
+			InetSocketAddress addr = new InetSocketAddress(n.hostIp, Integer.valueOf(n.port));
+			if(nodeCluster.isStarted) {
+				new AsyncClient(nodeCluster).pingNode(addr, "SYN_START|"+n.uuid+"|"+nodeCluster.lastupdated);
+			} else {
+				new AsyncClient(nodeCluster).pingNode(addr, "SYN|"+n.uuid+"|"+nodeCluster.lastupdated);
+			}
 		}
 	}
 	
@@ -95,13 +89,19 @@ public class ClusterManager {
 				Node n = ((Node) pair.getValue());
 				//System.out.println(pair.getKey() + " = " + pair.getValue());
 				InetSocketAddress addr = new InetSocketAddress(n.hostIp, Integer.valueOf(n.port));
-				boolean error = new AsyncClient(nodeCluster).pingNode(addr, "SYN|"+n.uuid+"|"+nodeCluster.lastupdated);
+				boolean error = false;
+				if(!nodeCluster.isStarted) {
+					 error = new AsyncClient(nodeCluster).pingNode(addr, "SYN|"+n.uuid+"|"+nodeCluster.lastupdated);
+				} else {
+					 error = new AsyncClient(nodeCluster).pingNode(addr, "SYN_START|"+n.uuid+"|"+nodeCluster.lastupdated);
+				}
 				if (error) {
+					System.out.println("REMOVED DEAD NODE:" + nodeCluster.nodes.get(pair.getKey())+":FROM NODE:"+nodeCluster.localNode);
 					it.remove();
-					System.out.println("Dead node detected removed: " + pair.getKey());
 					if(nodeCluster.isStarted) {
 						nodeCluster.isStarted = false;
 						nodeCluster.lastupdated = System.nanoTime();
+						updateStartNodeListState();
 						
 					}
 				}
