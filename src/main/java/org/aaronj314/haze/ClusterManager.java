@@ -60,7 +60,7 @@ public class ClusterManager {
 			if (uuids.get(0).equals(nodeCluster.localNode.uuid) && !nodeCluster.isStarted) {
 				nodeCluster.isStarted = true;
 				nodeCluster.lastupdated = System.nanoTime();
-				System.out.println("We are started!::clusterSize="+(nodeCluster.size() +1));
+				System.out.println("********We are started!***********::clusterSize="+(nodeCluster.size() +1));
 			}
 		}
 	}
