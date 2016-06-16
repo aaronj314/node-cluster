@@ -1,5 +1,5 @@
-# hazelcast
-Solution for code test from Hazelcast.
+# Node Cluster
+
 Note the TTL for multicast network is set to '1'.
 
 ## How it works
